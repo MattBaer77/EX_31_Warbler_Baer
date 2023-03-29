@@ -1,4 +1,6 @@
 import os
+import pdb
+
 from secrets import sneakybeaky
 
 from flask import Flask, render_template, request, flash, redirect, session, g
@@ -19,7 +21,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = sneakybeaky
 toolbar = DebugToolbarExtension(app)
 
@@ -292,12 +294,16 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
+    # pdb.set_trace()
+
     if g.user:
         messages = (Message
                     .query
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+
+        # pdb.set_trace()
 
         return render_template('home.html', messages=messages)
 
