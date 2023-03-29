@@ -10,7 +10,34 @@ db = SQLAlchemy()
 
 
 class Follows(db.Model):
-    """Connection of a follower <-> followed_user."""
+    """
+    Connection of a follower <-> followed_user.
+
+    Maps many to many relationship between users: follower : followed_users
+
+    Composite Primary Key -
+    Neither column can be NULL
+    The combination of columns must be unique - one instance of the rleationship between a follower following a followed_user
+
+    **********
+    (Part One) - Note: Note that the follows table has an unusual arrangement: it has two foreign keys to the same table. Why?
+
+    This table stores data on which users follow which other users.
+
+    This is a composite primary key releationship.
+
+    Two foreign keys in this table are also primary keys - meaning they must be unique and not nullable.
+
+    This is done to:
+    
+    - Only allow user_being_followed_id and user_following_id to exist if there are 2 values to comprise the relationship. If one of the two users is deleted, the relationship can no longer exist.
+
+    - Only to allow the unique combination of user_being_followed_id and user_following_id to exist once on the table.
+
+    - This is done with only values from the users table because are both mapped to user, as the relationship is between one user following another.
+    **********
+
+    """
 
     __tablename__ = 'follows'
 
@@ -46,6 +73,7 @@ class Likes(db.Model):
         db.Integer,
         db.ForeignKey('messages.id', ondelete='cascade'),
         unique=True
+        # Check this functionality - unique=True.
     )
 
 
@@ -94,6 +122,8 @@ class User(db.Model):
         nullable=False,
     )
 
+    # **********
+
     messages = db.relationship('Message')
 
     followers = db.relationship(
@@ -114,6 +144,11 @@ class User(db.Model):
         'Message',
         secondary="likes"
     )
+
+    # primaryjoin -
+    # secondaryjoin -
+
+    # **********
 
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"
@@ -197,7 +232,11 @@ class Message(db.Model):
         nullable=False,
     )
 
+    # **********
+
     user = db.relationship('User')
+
+    # **********
 
 
 def connect_db(app):
