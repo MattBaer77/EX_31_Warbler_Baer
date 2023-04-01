@@ -324,16 +324,15 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
-    # pdb.set_trace()
-
     if g.user:
+        user_following_ids = [followed_user.id for followed_user in g.user.following] + [g.user.id]
+
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(user_following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
-
-        # pdb.set_trace()
 
         return render_template('home.html', messages=messages)
 
