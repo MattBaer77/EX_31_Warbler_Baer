@@ -182,6 +182,28 @@ def users_followers(user_id):
     return render_template('users/followers.html', user=user)
 
 
+@app.route('/users/<int:user_id>/likes')
+def users_likes(user_id):
+    """Show list of likes of this user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+
+    user_liked_ids = [liked_message.id for liked_message in user.likes]
+
+    messages = (Message
+                .query
+                .filter(Message.id.in_(user_liked_ids))
+                .order_by(Message.timestamp.desc())
+                .limit(100)
+                .all())
+
+    return render_template('users/likes.html', user=user, messages=messages)
+
+
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
