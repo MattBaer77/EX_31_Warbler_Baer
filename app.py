@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Likes
 
 CURR_USER_KEY = "curr_user"
 
@@ -313,6 +313,45 @@ def messages_destroy(message_id):
 
 
 ##############################################################################
+# Like pages
+
+@app.route('/users/add_like/<int:message_id>', methods=["POST"])
+def toggle_like(message_id):
+    """A user can toggle to like a message"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    user = g.user
+    message = Message.query.get(message_id)
+
+    if message not in user.likes:
+        try:
+            like = Likes(
+                user_id = user.id,
+                message_id = message.id
+            )
+            db.session.add(like)
+            db.session.commit()
+            return redirect('/')
+
+        except IntegrityError:
+            flash("Already Liked")
+
+            return redirect('/')
+
+    liked_message = Likes.query.filter(Likes.user_id == user.id, Likes.message_id == message.id).one()
+
+    db.session.delete(liked_message)
+    db.session.commit()
+
+    return redirect('/')
+
+
+#
+
+##############################################################################
 # Homepage and error pages
 
 
@@ -326,6 +365,7 @@ def homepage():
 
     if g.user:
         user_following_ids = [followed_user.id for followed_user in g.user.following] + [g.user.id]
+        user_likes_ids = [liked_message.id for liked_message in g.user.likes]
 
         messages = (Message
                     .query
@@ -334,7 +374,7 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, likes=user_likes_ids)
 
     else:
         return render_template('home-anon.html')
