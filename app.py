@@ -313,7 +313,7 @@ def messages_destroy(message_id):
 
 
 ##############################################################################
-# Like pages
+# Like routes:
 
 @app.route('/users/add_like/<int:message_id>', methods=["POST"])
 def toggle_like(message_id):
@@ -326,8 +326,9 @@ def toggle_like(message_id):
     user = g.user
     message = Message.query.get(message_id)
 
-    if message not in user.likes:
-        try:
+    if message.user != user:
+
+        if message not in user.likes:
             like = Likes(
                 user_id = user.id,
                 message_id = message.id
@@ -336,20 +337,15 @@ def toggle_like(message_id):
             db.session.commit()
             return redirect('/')
 
-        except IntegrityError:
-            flash("Already Liked")
+        liked_message = Likes.query.filter(Likes.user_id == user.id, Likes.message_id == message.id).one()
+        db.session.delete(liked_message)
+        db.session.commit()
 
-            return redirect('/')
+        return redirect('/')
 
-    liked_message = Likes.query.filter(Likes.user_id == user.id, Likes.message_id == message.id).one()
+    flash("You cannnot like your own messages.", "danger")
+    return redirect("/")
 
-    db.session.delete(liked_message)
-    db.session.commit()
-
-    return redirect('/')
-
-
-#
 
 ##############################################################################
 # Homepage and error pages
