@@ -138,6 +138,19 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn('<button class="btn btn-primary btn-block btn-lg">Log in</button>', html)
 
+    def test_login_get_already_logged_in(self):
+        """User redirected away from login page if logged in"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            
+            resp = c.get("/login", follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('You are already logged in!', html)
+
     def test_login_post(self):
         """Can a user log in"""
 
@@ -161,3 +174,24 @@ class UserViewTestCase(TestCase):
             self.assertIn('<aside class="col-md-4 col-lg-3 col-sm-12" id="home-aside">', html)
             self.assertIn('<p>@testuser</p>', html)
 
+    def test_login_wrong_username(self):
+        """Is a user redirected and informed if username is incorrect"""
+
+        with self.client as c:
+
+            resp = c.post("/login", data={"username" : "incorrect_user_name", "password" : "testuser"}, follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('Invalid credentials.', html)
+
+    def test_login_wrong_password(self):
+        """Is a user redirected and informed if password is incorrect"""
+
+        with self.client as c:
+
+            resp = c.post("/login", data={"username" : "testuser", "password" : "incorrect_password"}, follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('Invalid credentials.', html)
