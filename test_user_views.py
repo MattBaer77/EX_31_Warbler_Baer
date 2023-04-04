@@ -94,7 +94,7 @@ class UserViewTestCase(TestCase):
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser3", "email" : "test3@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"})
+            resp = c.post("/signup", data={"username" : "testuser4", "email" : "test4@test.com", "password" : "testuser4", "image_url" : "testuser4.jpeg"})
 
             self.assertEqual(resp.status_code, 302)
             html = resp.get_data(as_text=True)
@@ -105,19 +105,19 @@ class UserViewTestCase(TestCase):
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser3", "email" : "test3@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"}, follow_redirects=True)
+            resp = c.post("/signup", data={"username" : "testuser4", "email" : "test4@test.com", "password" : "testuser4", "image_url" : "testuser4.jpeg"}, follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
-            self.assertIn('testuser3', html)
-            self.assertIn('testuser3.jpeg', html)
+            self.assertIn('testuser4', html)
+            self.assertIn('testuser4.jpeg', html)
 
     def test_user_signup_post_duplicate_username_redirect(self):
         """Is a user appropriately redirected if using duplicate username"""
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser", "email" : "test3@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"}, follow_redirects=True)
+            resp = c.post("/signup", data={"username" : "testuser", "email" : "test4@test.com", "password" : "testuser4", "image_url" : "testuser4.jpeg"}, follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
@@ -128,7 +128,7 @@ class UserViewTestCase(TestCase):
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser3", "email" : "test@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"}, follow_redirects=True)
+            resp = c.post("/signup", data={"username" : "testuser4", "email" : "test@test.com", "password" : "testuser4", "image_url" : "testuser4.jpeg"}, follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
@@ -322,14 +322,33 @@ class UserViewTestCase(TestCase):
 
 
     # def test_show_following_logged_in(self):
+    #     """Can a user view another user's followers if logged in?"""
+
+    #     with self.client as c:
+
+    #         with c.session_transaction() as sess:
+    #             sess[CURR_USER_KEY] = self.testuser.id
+
+    #         resp = c.get(f"/users/{self.testuser2.id}/followers")
+
+    #         self.assertEqual(resp.status_code, 200)
+
+    #         html = resp.get_data(as_text=True)
+    #         self.assertIn("", html)
+
+
+
+
     # def test_show_following_logged_in_nobody_case(self):
     # def test_show_following_logged_out(self):
+    # def test_show_following_logged_out_nobody_case(self):
 
     # def test_show_followers_logged_in(self):
     # def test_show_followers_logged_in_nobody_case(self):
     # def test_show_followers_logged_out(self):
+    # def test_show_followers_logged_out_nobody_case(self):
 
-    
+
     # def test_show_likes_logged_in(self):
     # def test_show_likes_logged_out(self):
     # def test_follow_logged_in(self):
