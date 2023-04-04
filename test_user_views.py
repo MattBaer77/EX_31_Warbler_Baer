@@ -127,3 +127,37 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn('Username or email already taken', html)
 
+    def test_login_get(self):
+        """Can a user view login page"""
+
+        with self.client as c:
+
+            resp = c.get("/login")
+
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<button class="btn btn-primary btn-block btn-lg">Log in</button>', html)
+
+    def test_login_post(self):
+        """Can a user log in"""
+
+        with self.client as c:
+
+            resp = c.post("/login", data={"username" : "testuser", "password" : "testuser"})
+
+            self.assertEqual(resp.status_code, 302)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<a href="/">/</a>', html)
+
+    def test_login_post_redirect(self):
+        """Can a user log in"""
+
+        with self.client as c:
+
+            resp = c.post("/login", data={"username" : "testuser", "password" : "testuser"}, follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('<aside class="col-md-4 col-lg-3 col-sm-12" id="home-aside">', html)
+            self.assertIn('<p>@testuser</p>', html)
+
