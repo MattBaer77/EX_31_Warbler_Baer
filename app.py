@@ -98,6 +98,10 @@ def login():
 
     form = LoginForm()
 
+    if g.user:
+        flash("You are already logged in!", "success")
+        return redirect('/')
+
     if form.validate_on_submit():
         user = User.authenticate(form.username.data,
                                  form.password.data)
