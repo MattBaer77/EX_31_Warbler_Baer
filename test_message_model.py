@@ -1,6 +1,7 @@
 """Message model tests."""
 
 import os
+import datetime
 from unittest import TestCase
 from sqlalchemy import exc
 
@@ -43,6 +44,14 @@ class MessageModelTestCase(TestCase):
         db.session.add_all([user1, user2])
         db.session.commit()
 
+        message = Message(text="test_message_model_text")
+        message2 = Message(text="test_message_model_text_2")
+
+        user1.messages.append(message)
+        user1.messages.append(message2)
+
+        db.session.commit()
+
 
     def tearDown(self):
         """Clean up any fouled transaction. Remove data from database after test completed."""
@@ -54,12 +63,18 @@ class MessageModelTestCase(TestCase):
         users = User.query.order_by(User.id.asc()).all()
         user1 = users[0]
 
-        message = Message(text="test_message_model_text")
-
-        user1.messages.append(message)
-
-        db.session.commit()
+        messages = Message.query.order_by(Message.id.asc()).all()
+        message = messages[0]
+        message2 = messages[1]
 
         self.assertIsNotNone(len(user1.messages))
+        self.assertEqual(message.id, message2.id - 1)
+        self.assertEqual(message.text, "test_message_model_text")
+        self.assertIsNotNone(message.timestamp)
+        self.assertEqual(f"{message.timestamp}"[0:10], f"{datetime.datetime.utcnow()}"[0:10])
         self.assertEqual(message.user_id, user1.id)
-        
+
+    # def tests_message_show_user()
+
+
+    # def test_message_delete_cascade()
