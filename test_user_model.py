@@ -62,6 +62,8 @@ class UserModelTestCase(TestCase):
         db.session.commit()
 
         self.user1_testID = user1.id
+        self.user1 = user1
+        self.user2 = user2
 
     def tearDown(self):
         """Clean up any fouled transaction. Remove data from database after test completed."""
@@ -102,11 +104,11 @@ class UserModelTestCase(TestCase):
         users = User.query.order_by(User.id.asc()).all()
         self.assertEqual(len(users), 3)
 
-        # users[0].id should be 1 less than users[1].id
-        self.assertEqual(users[0].id, (users[1].id - 1))
+        # self.user1.id should be 1 less than self.user2.id.id
+        self.assertEqual(self.user1.id, (self.user2.id - 1))
 
-        # users[0].id should be 2 less than users[2].id
-        self.assertEqual(users[0].id, (users[2].id - 2))
+        # self.user1.id should be 2 less than user3.id
+        self.assertEqual(self.user1.id, (user3.id - 2))
 
         # user3 attributes should equal those set above
         self.assertEqual(user3.email, "test3@test.com")
@@ -129,68 +131,48 @@ class UserModelTestCase(TestCase):
     def test___repr__(self):
         """Test __repr__ functions"""
 
-        users = User.query.order_by(User.id.asc()).all()
-        user1 = users[0]
-        user2 = users[1]
-
-        self.assertEqual(user1.__repr__(),f"<User #{user1.id}: test1user, test1@test.com>")
-        self.assertEqual(user2.__repr__(),f"<User #{user2.id}: test2user, test2@test.com>")
+        self.assertEqual(self.user1.__repr__(),f"<User #{self.user1.id}: test1user, test1@test.com>")
+        self.assertEqual(self.user2.__repr__(),f"<User #{self.user2.id}: test2user, test2@test.com>")
 
     def test_following(self):
         """Test is_following functions"""
 
-        users = User.query.order_by(User.id.asc()).all()
-        user1 = users[0]
-        user2 = users[1]
-
-        user2.following.append(user1)
+        self.user2.following.append(self.user1)
         db.session.commit()
 
-        self.assertEqual(len(user1.following), 0)
-        self.assertEqual(len(user2.following), 1)
-        self.assertEqual(user1.following, [])
-        self.assertEqual(user2.following, [user1])
+        self.assertEqual(len(self.user1.following), 0)
+        self.assertEqual(len(self.user2.following), 1)
+        self.assertEqual(self.user1.following, [])
+        self.assertEqual(self.user2.following, [self.user1])
 
     def test_followers(self):
         """Test is_following functions"""
 
-        users = User.query.order_by(User.id.asc()).all()
-        user1 = users[0]
-        user2 = users[1]
-
-        user2.followers.append(user1)
+        self.user2.followers.append(self.user1)
         db.session.commit()
 
-        self.assertEqual(len(user1.followers), 0)
-        self.assertEqual(len(user2.followers), 1)
-        self.assertEqual(user1.followers, [])
-        self.assertEqual(user2.followers, [user1])
+        self.assertEqual(len(self.user1.followers), 0)
+        self.assertEqual(len(self.user2.followers), 1)
+        self.assertEqual(self.user1.followers, [])
+        self.assertEqual(self.user2.followers, [self.user1])
 
     def test_is_following(self):
         """Test is_following functions"""
 
-        users = User.query.order_by(User.id.asc()).all()
-        user1 = users[0]
-        user2 = users[1]
-
-        user2.following.append(user1)
+        self.user2.following.append(self.user1)
         db.session.commit()
 
-        self.assertEqual(user1.is_following(user2), False)
-        self.assertEqual(user2.is_following(user1), True)
+        self.assertEqual(self.user1.is_following(self.user2), False)
+        self.assertEqual(self.user2.is_following(self.user1), True)
 
     def test_is_followed_by(self):
         """Test is_followed_by functions"""
 
-        users = User.query.order_by(User.id.asc()).all()
-        user1 = users[0]
-        user2 = users[1]
-
-        user2.followers.append(user1)
+        self.user2.followers.append(self.user1)
         db.session.commit()
 
-        self.assertEqual(user1.is_followed_by(user2), False)
-        self.assertEqual(user2.is_followed_by(user1), True)
+        self.assertEqual(self.user1.is_followed_by(self.user2), False)
+        self.assertEqual(self.user2.is_followed_by(self.user1), True)
 
     def test_signup_success(self):
         """Test signup classmethod"""
