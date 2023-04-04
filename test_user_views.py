@@ -69,6 +69,11 @@ class UserViewTestCase(TestCase):
         self.testuser.messages.append(message1)
         self.testuser.messages.append(message2)
 
+        followed = self.testuser2
+        follower = self.testuser3
+
+        follower.following.append(followed)
+
         db.session.commit()
 
         self.message1 = message1
@@ -77,6 +82,7 @@ class UserViewTestCase(TestCase):
         # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
         self.message1.id
         self.testuser2.id
+        self.testuser3.id
         # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
 
     def tearDown(self):
@@ -327,40 +333,75 @@ class UserViewTestCase(TestCase):
             self.assertIn("@testuser2", html)
 
 
-    # def test_show_following_logged_in(self):
-    #     """Can a user view another user's followers if logged in?"""
+    def test_show_followers_logged_in(self):
+        """Can a user view another user's followers if logged in?"""
 
-    #     with self.client as c:
+        with self.client as c:
 
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.testuser.id
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
-    #         resp = c.get(f"/users/{self.testuser2.id}/followers")
+            resp = c.get(f"/users/{self.testuser2.id}/followers")
 
-    #         self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.status_code, 200)
 
-    #         html = resp.get_data(as_text=True)
-    #         self.assertIn("", html)
+            html = resp.get_data(as_text=True)
+            self.assertIn("@testuser3", html)
+
+    def test_show_followers_logged_in_nobody_case(self):
+        """Can a user view another user's followers if logged in? - If no followers"""
+
+        with self.client as c:
+
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get(f"/users/{self.testuser3.id}/followers")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertNotIn("@testuser2", html)
 
 
+    def test_show_following_logged_in(self):
+        """Can a user view another user's following if logged in?"""
 
+        with self.client as c:
 
-    # def test_show_following_logged_in_nobody_case(self):
-    # def test_show_following_logged_out(self):
-    # def test_show_following_logged_out_nobody_case(self):
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
-    # def test_show_followers_logged_in(self):
-    # def test_show_followers_logged_in_nobody_case(self):
-    # def test_show_followers_logged_out(self):
-    # def test_show_followers_logged_out_nobody_case(self):
+            resp = c.get(f"/users/{self.testuser3.id}/following")
 
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn("@testuser2", html)
+
+    def test_show_following_logged_in_nobody_case(self):
+        """Can a user view another user's following if logged in? - If no followers"""
+
+        with self.client as c:
+
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get(f"/users/{self.testuser2.id}/following")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertNotIn("@testuser3", html)
 
     # def test_show_likes_logged_in(self):
-    # def test_show_likes_logged_out(self):
+
     # def test_follow_logged_in(self):
-    # def test_follow_logged_out(self):
+
     # def test_unfollow_logged_in(self):
-    # def test_unfollow_logged_out(self):
+
+
+    
     # def test_edit_profile_get_logged_in(self):
     # def test_edit_profile_get_logged_out(self):
     # def test_edit_profile_post_logged_in(self):
