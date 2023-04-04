@@ -44,13 +44,18 @@ class MessageModelTestCase(TestCase):
         db.session.add_all([user1, user2])
         db.session.commit()
 
-        message = Message(text="test_message_model_text")
+        message1 = Message(text="test_message_model_text")
         message2 = Message(text="test_message_model_text_2")
 
-        user1.messages.append(message)
+        user1.messages.append(message1)
         user1.messages.append(message2)
 
         db.session.commit()
+
+        self.user1 = user1
+        self.user2 = user2
+        self.message1 = message1
+        self.message2 = message2
 
 
     def tearDown(self):
@@ -60,19 +65,12 @@ class MessageModelTestCase(TestCase):
     def test_message_model(self):
         """Create a message and add to a user"""
 
-        users = User.query.order_by(User.id.asc()).all()
-        user1 = users[0]
-
-        messages = Message.query.order_by(Message.id.asc()).all()
-        message = messages[0]
-        message2 = messages[1]
-
-        self.assertIsNotNone(len(user1.messages))
-        self.assertEqual(message.id, message2.id - 1)
-        self.assertEqual(message.text, "test_message_model_text")
-        self.assertIsNotNone(message.timestamp)
-        self.assertEqual(f"{message.timestamp}"[0:10], f"{datetime.datetime.utcnow()}"[0:10])
-        self.assertEqual(message.user_id, user1.id)
+        self.assertIsNotNone(len(self.user1.messages))
+        self.assertEqual(self.message1.id, self.message2.id - 1)
+        self.assertEqual(self.message1.text, "test_message_model_text")
+        self.assertIsNotNone(self.message1.timestamp)
+        self.assertEqual(f"{self.message1.timestamp}"[0:10], f"{datetime.datetime.utcnow()}"[0:10])
+        self.assertEqual(self.message1.user_id, self.user1.id)
 
     # def tests_message_show_user()
 
