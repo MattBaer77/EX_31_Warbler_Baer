@@ -196,7 +196,7 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn('Invalid credentials.', html)
 
-    def logout(self):
+    def test_logout(self):
         """Can a user log out?"""
 
         with self.client as c:
@@ -206,3 +206,22 @@ class UserViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
             self.assertIn('Goodbye!', html)
+
+    # def test_users_show_logged_in(self):
+    # def test_users_show_logged_out(self):
+    # def test_show_following_logged_in(self):
+    # def test_show_following_logged_out(self):
+    # def test_show_followers_logged_in(self):
+    # def test_show_followers_logged_out(self):
+    # def test_show_likes_logged_in(self):
+    # def test_show_likes_logged_out(self):
+    # def test_follow_logged_in(self):
+    # def test_follow_logged_out(self):
+    # def test_unfollow_logged_in(self):
+    # def test_unfollow_logged_out(self):
+    # def test_edit_profile_get_logged_in(self):
+    # def test_edit_profile_get_logged_out(self):
+    # def test_edit_profile_post_logged_in(self):
+    # def test_edit_profile_post_logged_out(self):
+    # def test_edit_delete_post_logged_in(self):
+    # def test_edit_delete_post_logged_out(self):
