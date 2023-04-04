@@ -207,8 +207,87 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn('Goodbye!', html)
 
-    # def test_users_show_logged_in(self):
-    # def test_users_show_logged_out(self):
+    def test_users_show_logged_in(self):
+        """Can a logged in user see a page with other users?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get("/users")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn('@testuser', html)
+
+    def test_users_show_logged_out(self):
+        """Can a logged out user see a page with other users?"""
+
+        with self.client as c:
+
+            resp = c.get("/users")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn('@testuser', html)
+
+    def test_users_show_logged_in_search(self):
+        """Can a logged in user see a page with other users?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get("/users", query_string={"q":"testuser"})
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn('@testuser', html)
+
+    def test_users_show_logged_out_search(self):
+        """Can a logged out user see a page with other users?"""
+
+        with self.client as c:
+
+            resp = c.get("/users", query_string={"q":"testuser"})
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn('@testuser', html)
+
+    def test_users_show_logged_in_search_no_value(self):
+        """Can a logged in user see a page with other users?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get("/users", query_string={"q":"not_existing_user"})
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertNotIn('@testuser', html)
+            self.assertNotIn('@not_existing_user', html)
+
+    def test_users_show_logged_out_search_no_value(self):
+        """Can a logged out user see a page with other users?"""
+
+        with self.client as c:
+
+            resp = c.get("/users", query_string={"q":"not_existing_user"})
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertNotIn('@testuser', html)
+            self.assertNotIn('@not_existing_user', html)
+
+
     # def test_show_following_logged_in(self):
     # def test_show_following_logged_out(self):
     # def test_show_followers_logged_in(self):
