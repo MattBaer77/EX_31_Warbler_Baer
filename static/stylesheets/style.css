@@ -541,3 +541,21 @@ p.card-bio {
 .message-404 .form-inline input {
   flex: 1;
 }
+
+#logout-button-to-link {
+  background: none!important;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #66757f;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+#logout-button-to-link:hover {
+  color: #1c94e0;
+}
+#logout-form {
+  display: inline;
+
+}
