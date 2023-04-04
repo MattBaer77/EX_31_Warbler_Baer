@@ -196,13 +196,13 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertIn('Invalid credentials.', html)
 
-    # def logout(self):
-    #     """Is a user redirected and informed if password is incorrect"""
+    def logout(self):
+        """Can a user log out?"""
 
-    #     with self.client as c:
+        with self.client as c:
 
-    #         resp = c.post("/login", data={"username" : "testuser", "password" : "incorrect_password"}, follow_redirects=True)
+            resp = c.post("/logout", follow_redirects=True)
 
-    #         self.assertEqual(resp.status_code, 200)
-    #         html = resp.get_data(as_text=True)
-    #         self.assertIn('Invalid credentials.', html)
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('Goodbye!', html)
