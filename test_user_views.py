@@ -70,6 +70,7 @@ class UserViewTestCase(TestCase):
 
         # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
         self.message1.id
+        self.testuser2.id
         # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
 
     def tearDown(self):
@@ -293,18 +294,42 @@ class UserViewTestCase(TestCase):
             self.assertNotIn('@testuser', html)
             self.assertNotIn('@not_existing_user', html)
 
+    def test_show_specific_user_logged_in(self):
+        """Can a user view a specific other user if logged in?"""
 
-    # def test_show_specific_user_logged_in(self):
-    #     """Can a user view a specific other user if logged in?"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
+            resp = c.get(f"/users/{self.testuser2.id}")
 
+            self.assertEqual(resp.status_code, 200)
 
-    # def test_show_specific_user_logged_out(self):
+            html = resp.get_data(as_text=True)
+            self.assertIn("@testuser2", html)
+
+    def test_show_specific_user_logged_out(self):
+        """Can a user view a specific other user if logged out?"""
+
+        with self.client as c:
+
+            resp = c.get(f"/users/{self.testuser2.id}")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn("@testuser2", html)
+
 
     # def test_show_following_logged_in(self):
+    # def test_show_following_logged_in_nobody_case(self):
     # def test_show_following_logged_out(self):
+
     # def test_show_followers_logged_in(self):
+    # def test_show_followers_logged_in_nobody_case(self):
     # def test_show_followers_logged_out(self):
+
+    
     # def test_show_likes_logged_in(self):
     # def test_show_likes_logged_out(self):
     # def test_follow_logged_in(self):
