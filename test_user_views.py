@@ -87,7 +87,7 @@ class UserViewTestCase(TestCase):
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser2", "email" : "test2@test.com", "password" : "testuser2", "image_url" : "testuser2.jpeg"})
+            resp = c.post("/signup", data={"username" : "testuser3", "email" : "test3@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"})
 
             self.assertEqual(resp.status_code, 302)
             html = resp.get_data(as_text=True)
@@ -98,19 +98,19 @@ class UserViewTestCase(TestCase):
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser2", "email" : "test2@test.com", "password" : "testuser2", "image_url" : "testuser2.jpeg"}, follow_redirects=True)
+            resp = c.post("/signup", data={"username" : "testuser3", "email" : "test3@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"}, follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
-            self.assertIn('testuser2', html)
-            self.assertIn('testuser2.jpeg', html)
+            self.assertIn('testuser3', html)
+            self.assertIn('testuser3.jpeg', html)
 
     def test_user_signup_post_duplicate_username_redirect(self):
         """Is a user appropriately redirected if using duplicate username"""
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser", "email" : "test2@test.com", "password" : "testuser2", "image_url" : "testuser2.jpeg"}, follow_redirects=True)
+            resp = c.post("/signup", data={"username" : "testuser", "email" : "test3@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"}, follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
@@ -121,7 +121,7 @@ class UserViewTestCase(TestCase):
 
         with self.client as c:
 
-            resp = c.post("/signup", data={"username" : "testuser2", "email" : "test@test.com", "password" : "testuser2", "image_url" : "testuser2.jpeg"}, follow_redirects=True)
+            resp = c.post("/signup", data={"username" : "testuser3", "email" : "test@test.com", "password" : "testuser3", "image_url" : "testuser3.jpeg"}, follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
@@ -234,7 +234,7 @@ class UserViewTestCase(TestCase):
             self.assertIn('@testuser', html)
 
     def test_users_show_logged_in_search(self):
-        """Can a logged in user see a page with other users?"""
+        """Can a logged in user search for a user that does exist?"""
 
         with self.client as c:
             with c.session_transaction() as sess:
@@ -248,7 +248,7 @@ class UserViewTestCase(TestCase):
             self.assertIn('@testuser', html)
 
     def test_users_show_logged_out_search(self):
-        """Can a logged out user see a page with other users?"""
+        """Can a logged out user search for a user that does exist?"""
 
         with self.client as c:
 
@@ -260,7 +260,7 @@ class UserViewTestCase(TestCase):
             self.assertIn('@testuser', html)
 
     def test_users_show_logged_in_search_no_value(self):
-        """Can a logged in user see a page with other users?"""
+        """Can a logged in user search for a user that does not exist?"""
 
         with self.client as c:
             with c.session_transaction() as sess:
@@ -275,7 +275,7 @@ class UserViewTestCase(TestCase):
             self.assertNotIn('@not_existing_user', html)
 
     def test_users_show_logged_out_search_no_value(self):
-        """Can a logged out user see a page with other users?"""
+        """Can a logged out user search for a user that does not exist?"""
 
         with self.client as c:
 
@@ -287,6 +287,13 @@ class UserViewTestCase(TestCase):
             self.assertNotIn('@testuser', html)
             self.assertNotIn('@not_existing_user', html)
 
+
+    # def test_show_specific_user_logged_in(self):
+    #     """Can a user view a specific other user if logged in?"""
+
+
+
+    # def test_show_specific_user_logged_out(self):
 
     # def test_show_following_logged_in(self):
     # def test_show_following_logged_out(self):
