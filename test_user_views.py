@@ -49,7 +49,13 @@ class UserViewTestCase(TestCase):
                                     password="testuser",
                                     image_url=None)
 
+        self.testuser2 = User.signup(username="testuser2",
+                                    email="test2@test.com",
+                                    password="testuser2",
+                                    image_url=None)
+
         self.testuser.id = 1
+        self.testuser2.id = 2
 
         message1 = Message(id=1, text="test_message_views_text_1")
         message2 = Message(id=2, text="test_message_views_text_2")
