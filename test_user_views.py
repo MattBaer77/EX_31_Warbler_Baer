@@ -504,6 +504,53 @@ class UserViewTestCase(TestCase):
         self.assertIn('@testuser3', html)
 
 
-    # def test_edit_profile_get_logged_in(self):
-    # def test_edit_profile_post_logged_in(self):
-    # def test_edit_delete_post_logged_in(self):
+    def test_edit_profile_get_logged_in(self):
+        """Can a user get their profile edit form page?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+        resp = c.get(f"/users/profile")
+
+        self.assertEqual(resp.status_code, 200)
+
+        html = resp.get_data(as_text=True)
+
+        self.assertIn("To confirm changes, enter your password:", html)
+        self.assertIn("Enter your password to confirm", html)
+        self.assertIn("Edit this user!", html)
+
+
+    def test_edit_profile_post_logged_in(self):
+        """Can a user edit their profile?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+        resp = c.post(f"/users/profile", data={"username" : "testuser_edited", "email" : "test@test.com", "password" : "testuser", "image_url" : "None"}, follow_redirects=True)
+
+        self.assertEqual(resp.status_code, 200)
+
+        html = resp.get_data(as_text=True)
+
+        self.assertIn("testuser_edited", html)
+
+
+    def test_delete_post_logged_in(self):
+        """Can a user delete their account?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+        resp = c.post(f"/users/delete")
+
+        self.assertEqual(resp.status_code, 302)
+
+        check_all_users = User.query.order_by(User.id.asc()).all()
+
+        self.assertNotEqual(check_all_users[0].username, "testuser")
+        self.assertEqual(check_all_users[0].username, "testuser2")
+
