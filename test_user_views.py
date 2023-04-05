@@ -8,7 +8,7 @@
 import os
 from unittest import TestCase
 
-from models import db, connect_db, Message, User
+from models import db, connect_db, Message, User, Likes
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -76,11 +76,21 @@ class UserViewTestCase(TestCase):
 
         db.session.commit()
 
+        like = Likes(
+            user_id = self.testuser2.id,
+            message_id = message1.id
+        )
+
+        db.session.add(like)
+
+        db.session.commit()
+
         self.message1 = message1
         self.message2 = message2
 
         # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
         self.message1.id
+        self.testuser.id
         self.testuser2.id
         self.testuser3.id
         # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
@@ -394,17 +404,106 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
             self.assertNotIn("@testuser3", html)
 
-    # def test_show_likes_logged_in(self):
+    def test_show_likes_logged_in(self):
+        """Can a user view anotehr user's liked messages?"""
 
-    # def test_follow_logged_in(self):
+        with self.client as c:
+
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser3.id
+
+            resp = c.get(f"/users/{self.testuser2.id}/likes")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertIn("test_message_views_text_1", html)
+
+    def test_show_likes_logged_in_none_case(self):
+        """Can a user view another user's empty liked messages page?"""
+
+        with self.client as c:
+
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser3.id
+
+            resp = c.get(f"/users/{self.testuser.id}/likes")
+
+            self.assertEqual(resp.status_code, 200)
+
+            html = resp.get_data(as_text=True)
+            self.assertNotIn("test_message_views_text_1", html)
+            self.assertIn('<ul class="list-group" id="messages">\n\n      \n\n    </ul>', html)
+
+
+    def test_follow_logged_in(self):
+        """Can a user follow another user?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+        resp = c.post(f"/users/follow/{self.testuser2.id}", follow_redirects=True)
+
+        self.assertEqual(resp.status_code, 200)
+
+        html = resp.get_data(as_text=True)
+
+        self.assertIn('@testuser2', html)
+        self.assertNotIn('@testuser3', html)
+
 
     # def test_unfollow_logged_in(self):
+    #     """Can a user follow another user?"""
+
+    #     with self.client as c:
+    #         with c.session_transaction() as sess:
+    #             sess[CURR_USER_KEY] = self.testuser3.id
+
+    #     resp = c.post(f"/users/stop-following/{self.testuser2.id}", follow_redirects=True)
+
+    #     self.assertEqual(resp.status_code, 200)
+
+    #     html = resp.get_data(as_text=True)
+
+    #     self.assertNotIn('@testuser2', html)
 
 
-    
+    def test_unfollow_logged_in(self):
+        """Can a user follow another user?"""
+
+        followed = self.testuser2
+        follower = self.testuser
+
+        follower.following.append(followed)
+
+        db.session.commit()
+
+        followed = self.testuser3
+        follower = self.testuser
+
+        follower.following.append(followed)
+
+        db.session.commit()
+
+        # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
+        self.testuser2.id
+        # Why is it making me do this? - Detached instance error if not. - Does not occur in other files.
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+        resp = c.post(f"/users/stop-following/{self.testuser2.id}", follow_redirects=True)
+
+        self.assertEqual(resp.status_code, 200)
+
+        html = resp.get_data(as_text=True)
+
+        self.assertNotIn('@testuser2', html)
+        self.assertIn('@testuser3', html)
+
+
     # def test_edit_profile_get_logged_in(self):
-    # def test_edit_profile_get_logged_out(self):
     # def test_edit_profile_post_logged_in(self):
-    # def test_edit_profile_post_logged_out(self):
     # def test_edit_delete_post_logged_in(self):
-    # def test_edit_delete_post_logged_out(self):
